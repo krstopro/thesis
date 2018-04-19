@@ -7,12 +7,10 @@ class LookupTableManual(nn.Module):
 	"""description"""
 	
 	def __init__(self, vocab_size, embedding_size, output_size):
-		super(DoubleLSTM, self).__init__()
+		super(LookupTableManual, self).__init__()
 		self.embedding_size = embedding_size
-		self.hidden_size = hidden_size
-		self.num_layers = num_layers
 		self.embedding = nn.Embedding(vocab_size, embedding_size)
-		self.linear = nn.Linear(hidden_size, output_size)
+		# self.linear = nn.Linear(?, output_size)
 	
 	def init_hidden(self, batch_size):
 		return (autograd.Variable(torch.zeros(self.num_layers, batch_size, self.hidden_size)),

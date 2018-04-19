@@ -54,7 +54,7 @@ if (__name__ == '__main__'):
 	train_dataset = LanguagesDataset('data/train.txt')
 	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = True)
 	test_dataset = LanguagesDataset('data/test.txt')
-	model = DoubleLSTM(VOCAB_SIZE, EMBEDDING_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, NUM_LAYERS)
+	model = LookupTableManual(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
 	nll = nn.NLLLoss()
 	optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
 	X1_train, X2_train, y_train = process2(train_dataset)
