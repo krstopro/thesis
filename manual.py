@@ -34,5 +34,5 @@ class LookupTableManual(nn.Module):
 		rs = torch.bmm(ts, ps)
 		ms = torch.max(rs, dim = 2)[0]
 		ms = torch.max(ms, dim = 1)[0]
-		logits = F.log_softmax(self.linear(ms))
+		logits = F.log_softmax(self.linear(ms.unsqueeze(1)))
 		return logits
