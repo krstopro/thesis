@@ -1,3 +1,5 @@
+import argparse
+import os
 import torch
 import torch.autograd as autograd
 import torch.nn as nn
@@ -51,40 +53,46 @@ def accuracy(predictions, labels):
 	return ((predictions.max(1)[1] == labels).double().sum() / predictions.size(0)).data[0]
 
 if (__name__ == '__main__'):
-	results = open('results.txt', 'w')
+	ap = argparse.ArgumentParser()
+	ap.add_argument('-o', '--output', default='results')
+	ap.add_argument('-s', '--seed', type=int, default=0)
+	args = ap.parse_args()
+
+	os.makedirs(args.output, exist_ok=True)
+	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
 	train_dataset = LanguagesDataset('data/train1.txt')
 	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = True)
 	test_dataset = LanguagesDataset('data/test1.txt')
 	nll = nn.NLLLoss()
 	X1_train, X2_train, y_train = process2(train_dataset)
 	X1_test, X2_test, y_test = process2(test_dataset)
-	for i in range(10000):
-		model = LookupTableAuto(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
-		optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
-		train_epoch_accuracy = []
-		test_epoch_accuracy = []
-		epochs = np.arange(1, NUM_EPOCHS+1)
-		for epoch in epochs:
-			for batch in data_loader:
-				X1_batch, X2_batch, y_batch = process(batch)
-				model.zero_grad()
-				logits = model(X1_batch, X2_batch)
-				loss = nll(logits, y_batch)
-				# print('Loss = ' + str(loss.data[0]))
-				loss.backward()
-				optimizer.step()
-			train_accuracy = accuracy(model(X1_train, X2_train), y_train)
-			test_accuracy = accuracy(model(X1_test, X2_test), y_test)
-			train_epoch_accuracy.append(train_accuracy)
-			test_epoch_accuracy.append(test_accuracy)
-			# print('Epoch: ' + str(epoch))
-			# print('Train accuracy: ' + str(train_accuracy))
-			# print('Test accuracy: ' + str(test_accuracy))
-		results.write(' '.join([ str(round(100 * x, 2)) for x in train_epoch_accuracy]))
-		results.write('\n')
-		results.write(' '.join([ str(round(100 * x, 2)) for x in test_epoch_accuracy]))
-		results.write('\n')
-		# plt.plot(epochs, train_epoch_accuracy, 'b')
-		# plt.plot(epochs, test_epoch_accuracy, 'k')
-		# plt.show()
+	torch.manual_seed(args.seed)
+	model = LookupTableAuto(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
+	optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
+	train_epoch_accuracy = []
+	test_epoch_accuracy = []
+	epochs = np.arange(1, NUM_EPOCHS+1)
+	for epoch in epochs:
+		for batch in data_loader:
+			X1_batch, X2_batch, y_batch = process(batch)
+			model.zero_grad()
+			logits = model(X1_batch, X2_batch)
+			loss = nll(logits, y_batch)
+			# print('Loss = ' + str(loss.data[0]))
+			loss.backward()
+			optimizer.step()
+		train_accuracy = accuracy(model(X1_train, X2_train), y_train)
+		test_accuracy = accuracy(model(X1_test, X2_test), y_test)
+		train_epoch_accuracy.append(train_accuracy)
+		test_epoch_accuracy.append(test_accuracy)
+		# print('Epoch: ' + str(epoch))
+		# print('Train accuracy: ' + str(train_accuracy))
+		# print('Test accuracy: ' + str(test_accuracy))
+	results.write(' '.join([ str(round(100 * x, 2)) for x in train_epoch_accuracy]))
+	results.write('\n')
+	results.write(' '.join([ str(round(100 * x, 2)) for x in test_epoch_accuracy]))
+	results.write('\n')
+	# plt.plot(epochs, train_epoch_accuracy, 'b')
+	# plt.plot(epochs, test_epoch_accuracy, 'k')
+	# plt.show()
 	results.close()
