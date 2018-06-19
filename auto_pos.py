@@ -13,8 +13,8 @@ class LookupTablePos(nn.Module):
 		self.embedding = nn.Embedding(vocab_size, embedding_size)
 		self.linear = nn.Linear(1, output_size)
 		self.num_layers = 1
-		self.hidden_size = 20
-		self.lstm = nn.LSTM(embedding_size, self.hidden_size)
+		self.hidden_size = 10
+		self.lstm = nn.LSTM(2 * embedding_size, self.hidden_size)
 		# different embedding for positions
 		self.pos_embedding = nn.Embedding(4, embedding_size)
 	
