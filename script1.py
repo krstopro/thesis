@@ -7,6 +7,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from data_utils import *
 from auto import *
+from manual import *
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -18,6 +19,7 @@ NUM_LAYERS = 1
 NUM_EPOCHS = 100
 BATCH_SIZE = 100
 LEARNING_RATE = 0.01
+K_FACTORS = 1
 
 char2index = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, '#': 6, ' ': 7 }
 
@@ -56,6 +58,7 @@ if (__name__ == '__main__'):
 	ap = argparse.ArgumentParser()
 	ap.add_argument('-o', '--output', default='results')
 	ap.add_argument('-s', '--seed', type=int, default=0)
+	ap.add_argument('-m', '--model', choices=['manual', 'auto'])
 	args = ap.parse_args()
 
 	os.makedirs(args.output, exist_ok=True)
@@ -67,7 +70,10 @@ if (__name__ == '__main__'):
 	X1_train, X2_train, y_train = process2(train_dataset)
 	X1_test, X2_test, y_test = process2(test_dataset)
 	torch.manual_seed(args.seed)
-	model = LookupTableAuto(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
+	if args.model == 'auto':
+	    model = LookupTableAuto(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
+	elif args.model == 'manual':
+	    model = LookupTableManual(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE, K_FACTORS)
 	optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
 	train_epoch_accuracy = []
 	test_epoch_accuracy = []

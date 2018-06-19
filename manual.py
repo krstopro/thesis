@@ -6,13 +6,14 @@ import torch.nn.functional as F
 class LookupTableManual(nn.Module):
 	"""description"""
 	
-	def __init__(self, vocab_size, embedding_size, output_size):
+	def __init__(self, vocab_size, embedding_size, output_size, k_factors):
 		super(LookupTableManual, self).__init__()
 		self.embedding_size = embedding_size
 		self.embedding = nn.Embedding(vocab_size, embedding_size)
 		self.linear = nn.Linear(1, output_size)
 		self.num_layers = 1
-		self.hidden_size = 10
+		self.hidden_size = embedding_size
+		self.k_factors = k_factors
 		self.lstm = nn.LSTM(embedding_size, self.hidden_size)
 	
 	def init_hidden(self, batch_size):
@@ -34,7 +35,7 @@ class LookupTableManual(nn.Module):
 		lstm_out, hidden = self.lstm(embeddings1, hidden)
 		
 		hs = []
-		for i in range(5):
+		for i in range(self.k_factors):
 			hs.append(lstm_out.transpose(0, 1).narrow(1, 4*i, 3))
 		hiddens = torch.stack(hs, 1)
 		
@@ -44,7 +45,7 @@ class LookupTableManual(nn.Module):
 		embeddings2 = torch.stack(es, 1)
 		
 		# ts = embeddings1.view(batch_size, 5, -1)
-		ts = hiddens.view(batch_size, 5, -1)
+		ts = hiddens.view(batch_size, self.k_factors, -1)
 		ps = embeddings2.view(batch_size, 18, -1).transpose(1, 2)
 		
 		rs = torch.bmm(ts, ps)
