@@ -12,13 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 VOCAB_SIZE = 7
-EMBEDDING_SIZE = 10
-HIDDEN_SIZE = 50
 OUTPUT_SIZE = 2
 NUM_LAYERS = 1
 NUM_EPOCHS = 100
 BATCH_SIZE = 100
-LEARNING_RATE = 0.01
 K_FACTORS = 1
 
 char2index = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, '#': 6, ' ': 7 }
@@ -58,6 +55,8 @@ if (__name__ == '__main__'):
 	ap = argparse.ArgumentParser()
 	ap.add_argument('-o', '--output', default='results')
 	ap.add_argument('-s', '--seed', type=int, default=0)
+	ap.add_argument('-e', '--embedding-size', type=int, default=10)
+	ap.add_argument('-l', '--learning-rate', type=float, default=0.1)
 	ap.add_argument('-m', '--model', choices=['manual', 'auto'])
 	args = ap.parse_args()
 
@@ -71,10 +70,10 @@ if (__name__ == '__main__'):
 	X1_test, X2_test, y_test = process2(test_dataset)
 	torch.manual_seed(args.seed)
 	if args.model == 'auto':
-	    model = LookupTableAuto(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
+	    model = LookupTableAuto(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
 	elif args.model == 'manual':
-	    model = LookupTableManual(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE, K_FACTORS)
-	optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
+	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, K_FACTORS)
+	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)
 	train_epoch_accuracy = []
 	test_epoch_accuracy = []
 	epochs = np.arange(1, NUM_EPOCHS+1)
