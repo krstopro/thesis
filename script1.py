@@ -7,6 +7,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from data_utils import *
 from auto import *
+from auto_pos import *
 from manual import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -57,7 +58,7 @@ if (__name__ == '__main__'):
 	ap.add_argument('-s', '--seed', type=int, default=0)
 	ap.add_argument('-e', '--embedding-size', type=int, default=10)
 	ap.add_argument('-l', '--learning-rate', type=float, default=0.1)
-	ap.add_argument('-m', '--model', choices=['manual', 'auto'])
+	ap.add_argument('-m', '--model', choices=['manual', 'auto', 'auto_pos'])
 	args = ap.parse_args()
 
 	os.makedirs(args.output, exist_ok=True)
@@ -71,6 +72,8 @@ if (__name__ == '__main__'):
 	torch.manual_seed(args.seed)
 	if args.model == 'auto':
 	    model = LookupTableAuto(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
+	elif args.model == 'auto_pos':
+	    model = LookupTablePos(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
 	elif args.model == 'manual':
 	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, K_FACTORS)
 	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)

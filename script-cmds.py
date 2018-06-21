@@ -7,5 +7,5 @@ for s in range(100):
                         e,
                         l,
                         m,
-                        "results/m-{}-{}-{}".format(s, e, l))
+                        "results/{}/{}-{}".format(m, e, l))
                 print(CMD)
