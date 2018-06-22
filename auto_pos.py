@@ -14,13 +14,13 @@ class LookupTablePos(nn.Module):
 		self.linear = nn.Linear(1, output_size)
 		self.num_layers = 1
 		self.hidden_size = 10
-		self.lstm = nn.LSTM(2 * embedding_size, self.hidden_size)
+		self.lstm = nn.LSTM(2 * embedding_size, 3 * self.embedding_size)
 		# different embedding for positions
 		self.pos_embedding = nn.Embedding(4, embedding_size)
 	
 	def init_hidden(self, batch_size):
-		return (autograd.Variable(torch.zeros(self.num_layers, batch_size, self.hidden_size)),
-		        autograd.Variable(torch.zeros(self.num_layers, batch_size, self.hidden_size)))
+		return (autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * self.embedding_size)),
+		        autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * self.embedding_size)))
 	
 	def forward(self, input1, input2):
 		"""
@@ -40,10 +40,12 @@ class LookupTablePos(nn.Module):
 		x = torch.cat([embeddings1, pos_embeddings], 2).transpose(0, 1)
 		lstm_out, hidden = self.lstm(x, hidden)
 		
+		"""
 		hs = []
 		for i in range(5):
 			hs.append(lstm_out.transpose(0, 1).narrow(1, 4*i, 3))
 		hiddens = torch.stack(hs, 1)
+		"""
 		
 		es = []
 		for i in range(18):
@@ -51,7 +53,7 @@ class LookupTablePos(nn.Module):
 		embeddings2 = torch.stack(es, 1)
 		
 		# ts = embeddings1.view(batch_size, 5, -1)
-		ts = hiddens.view(batch_size, 5, -1)
+		ts = hidden[0].view(batch_size, 1, -1)
 		ps = embeddings2.view(batch_size, 18, -1).transpose(1, 2)
 		
 		rs = torch.bmm(ts, ps)
