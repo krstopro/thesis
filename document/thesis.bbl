@@ -1,0 +1,256 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.8 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\sortlist[entry]{nty/global/}
+  \entry{cho2014learning}{article}{}
+    \name{author}{7}{}{%
+      {{hash=CK}{%
+         family={Cho},
+         familyi={C\bibinitperiod},
+         given={Kyunghyun},
+         giveni={K\bibinitperiod},
+      }}%
+      {{hash=MBV}{%
+         family={Merri{\"e}nboer},
+         familyi={M\bibinitperiod},
+         given={Bart\bibnamedelima Van},
+         giveni={B\bibinitperiod\bibinitdelim V\bibinitperiod},
+      }}%
+      {{hash=GC}{%
+         family={Gulcehre},
+         familyi={G\bibinitperiod},
+         given={Caglar},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=BD}{%
+         family={Bahdanau},
+         familyi={B\bibinitperiod},
+         given={Dzmitry},
+         giveni={D\bibinitperiod},
+      }}%
+      {{hash=BF}{%
+         family={Bougares},
+         familyi={B\bibinitperiod},
+         given={Fethi},
+         giveni={F\bibinitperiod},
+      }}%
+      {{hash=SH}{%
+         family={Schwenk},
+         familyi={S\bibinitperiod},
+         given={Holger},
+         giveni={H\bibinitperiod},
+      }}%
+      {{hash=BY}{%
+         family={Bengio},
+         familyi={B\bibinitperiod},
+         given={Yoshua},
+         giveni={Y\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{CK+1}
+    \strng{fullhash}{CKMBVGCBDBFSHBY1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \field{title}{Learning phrase representations using RNN encoder-decoder for
+  statistical machine translation}
+    \field{journaltitle}{arXiv preprint arXiv:1406.1078}
+    \field{year}{2014}
+  \endentry
+
+  \entry{gers1999learning}{article}{}
+    \name{author}{3}{}{%
+      {{hash=GFA}{%
+         family={Gers},
+         familyi={G\bibinitperiod},
+         given={Felix\bibnamedelima A.},
+         giveni={F\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+      {{hash=SJ}{%
+         family={Schmidhuber},
+         familyi={S\bibinitperiod},
+         given={J{\"u}rgen},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=CF}{%
+         family={Cummins},
+         familyi={C\bibinitperiod},
+         given={Fred},
+         giveni={F\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IET}%
+    }
+    \strng{namehash}{GFASJCF1}
+    \strng{fullhash}{GFASJCF1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{title}{Learning to forget: Continual prediction with LSTM}
+    \field{year}{1999}
+  \endentry
+
+  \entry{graves2012supervised}{incollection}{}
+    \name{author}{1}{}{%
+      {{hash=GA}{%
+         family={Graves},
+         familyi={G\bibinitperiod},
+         given={Alex},
+         giveni={A\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Springer}%
+    }
+    \strng{namehash}{GA1}
+    \strng{fullhash}{GA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{booktitle}{Supervised sequence labelling with recurrent neural
+  networks}
+    \field{pages}{5\bibrangedash 13}
+    \field{title}{Supervised sequence labelling}
+    \field{year}{2012}
+  \endentry
+
+  \entry{hochreiter1997long}{article}{}
+    \name{author}{2}{}{%
+      {{hash=HS}{%
+         family={Hochreiter},
+         familyi={H\bibinitperiod},
+         given={Sepp},
+         giveni={S\bibinitperiod},
+      }}%
+      {{hash=SJ}{%
+         family={Schmidhuber},
+         familyi={S\bibinitperiod},
+         given={J{\"u}rgen},
+         giveni={J\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {MIT Press}%
+    }
+    \strng{namehash}{HSSJ1}
+    \strng{fullhash}{HSSJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{H}
+    \field{sortinithash}{H}
+    \field{number}{8}
+    \field{pages}{1735\bibrangedash 1780}
+    \field{title}{Long Short-Term Memory}
+    \field{volume}{9}
+    \field{journaltitle}{Neural Computation}
+    \field{year}{1997}
+  \endentry
+
+  \entry{llinas2008neuron}{article}{}
+    \name{author}{1}{}{%
+      {{hash=LR}{%
+         family={Llinas},
+         familyi={L\bibinitperiod},
+         given={Rodolfo},
+         giveni={R\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{LR1}
+    \strng{fullhash}{LR1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \verb{doi}
+    \verb 10.4249/scholarpedia.1490
+    \endverb
+    \field{note}{revision \#91570}
+    \field{number}{8}
+    \field{pages}{1490}
+    \field{title}{{N}euron}
+    \field{volume}{3}
+    \field{journaltitle}{Scholarpedia}
+    \field{year}{2008}
+  \endentry
+
+  \entry{rumelhart1985learning}{report}{}
+    \name{author}{3}{}{%
+      {{hash=RDE}{%
+         family={Rumelhart},
+         familyi={R\bibinitperiod},
+         given={David\bibnamedelima E.},
+         giveni={D\bibinitperiod\bibinitdelim E\bibinitperiod},
+      }}%
+      {{hash=HGE}{%
+         family={Hinton},
+         familyi={H\bibinitperiod},
+         given={Geoffrey\bibnamedelima E.},
+         giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod},
+      }}%
+      {{hash=WRJ}{%
+         family={Williams},
+         familyi={W\bibinitperiod},
+         given={Ronald\bibnamedelima J.},
+         giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{RDEHGEWRJ1}
+    \strng{fullhash}{RDEHGEWRJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{R}
+    \field{sortinithash}{R}
+    \field{title}{Learning internal representations by error propagation}
+    \list{institution}{1}{%
+      {California Univ San Diego La Jolla Inst for Cognitive Science}%
+    }
+    \field{type}{techreport}
+    \field{year}{1985}
+  \endentry
+
+  \entry{werbos1990backpropagation}{article}{}
+    \name{author}{1}{}{%
+      {{hash=WPJ}{%
+         family={Werbos},
+         familyi={W\bibinitperiod},
+         given={Paul\bibnamedelima J.},
+         giveni={P\bibinitperiod\bibinitdelim J\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{WPJ1}
+    \strng{fullhash}{WPJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{W}
+    \field{sortinithash}{W}
+    \field{number}{10}
+    \field{pages}{1550\bibrangedash 1560}
+    \field{title}{Backpropagation through time: what it does and how to do it}
+    \field{volume}{78}
+    \field{journaltitle}{Proceedings of the IEEE}
+    \field{year}{1990}
+  \endentry
+\endsortlist
+\endinput
