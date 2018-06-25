@@ -64,7 +64,7 @@ if (__name__ == '__main__'):
 	os.makedirs(args.output, exist_ok=True)
 	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
 	train_dataset = LanguagesDataset('data/train1.txt')
-	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = True)
+	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = False)
 	test_dataset = LanguagesDataset('data/test1.txt')
 	nll = nn.NLLLoss()
 	X1_train, X2_train, y_train = process2(train_dataset)
