@@ -9,6 +9,7 @@ from data_utils import *
 from auto import *
 from auto_pos import *
 from manual import *
+from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,7 +18,6 @@ OUTPUT_SIZE = 2
 NUM_LAYERS = 1
 NUM_EPOCHS = 100
 BATCH_SIZE = 100
-K_FACTORS = 1
 
 char2index = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, '#': 6, ' ': 7 }
 
@@ -59,13 +59,14 @@ if (__name__ == '__main__'):
 	ap.add_argument('-e', '--embedding-size', type=int, default=10)
 	ap.add_argument('-l', '--learning-rate', type=float, default=0.1)
 	ap.add_argument('-m', '--model', choices=['manual', 'auto', 'auto_pos'])
+	ap.add_argument('-k', '--k-factors', type=int, default=1)
 	args = ap.parse_args()
 
 	os.makedirs(args.output, exist_ok=True)
 	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
-	train_dataset = LanguagesDataset('data/train1.txt')
+	train_dataset = LanguagesDataset('data/train{}.txt'.format(args.k_factors))
 	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = False)
-	test_dataset = LanguagesDataset('data/test1.txt')
+	test_dataset = LanguagesDataset('data/test{}.txt'.format(args.k_factors))
 	nll = nn.NLLLoss()
 	X1_train, X2_train, y_train = process2(train_dataset)
 	X1_test, X2_test, y_test = process2(test_dataset)
@@ -75,12 +76,12 @@ if (__name__ == '__main__'):
 	elif args.model == 'auto_pos':
 	    model = LookupTablePos(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
 	elif args.model == 'manual':
-	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, K_FACTORS)
+	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
 	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)
 	train_epoch_accuracy = []
 	test_epoch_accuracy = []
 	epochs = np.arange(1, NUM_EPOCHS+1)
-	for epoch in epochs:
+	for epoch in tqdm(epochs):
 		for batch in data_loader:
 			X1_batch, X2_batch, y_batch = process(batch)
 			model.zero_grad()

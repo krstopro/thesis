@@ -36,7 +36,6 @@ class LookupTableAuto(nn.Module):
 		batch_size = input1.size(0)
 		embeddings1 = self.embedding(input1).transpose(0, 1)
 		hidden = self.init_hidden(batch_size)
-		print(embeddings1.shape)
 		lstm_out, hidden = self.lstm(embeddings1, hidden)
 		
 		es = []
