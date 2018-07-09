@@ -6,12 +6,13 @@ import torch.nn.functional as F
 class LookupTableAuto(nn.Module):
 	"""description"""
 	
-	def __init__(self, vocab_size, embedding_size, output_size):
+	def __init__(self, vocab_size, embedding_size, output_size, k_factors):
 		super(LookupTableAuto, self).__init__()
 		self.embedding_size = embedding_size
+		self.k_factors = k_factors
 		self.embedding = nn.Embedding(vocab_size, embedding_size)
 		# self.lstm = nn.LSTM(embedding_size, 5 * 3 * embedding_size)
-		self.lstm = nn.LSTM(embedding_size, 3 * embedding_size)
+		self.lstm = nn.LSTM(embedding_size, 3 * k_factors * embedding_size)
 		self.linear = nn.Linear(1, output_size)
 	
 	"""
@@ -21,8 +22,8 @@ class LookupTableAuto(nn.Module):
 	"""
 	
 	def init_hidden(self, batch_size):
-		return (autograd.Variable(torch.zeros(1, batch_size, 3 * self.embedding_size)),
-		        autograd.Variable(torch.zeros(1, batch_size, 3 * self.embedding_size)))
+		return (autograd.Variable(torch.zeros(1, batch_size, 3 * self.k_factors * self.embedding_size)),
+		        autograd.Variable(torch.zeros(1, batch_size, 3 * self.k_factors * self.embedding_size)))
 	
 	def forward(self, input1, input2):
 		"""
@@ -44,7 +45,7 @@ class LookupTableAuto(nn.Module):
 		embeddings2 = torch.stack(es, 1)
 		
 		# ts = hidden[0].view(batch_size, 5, -1)
-		ts = hidden[0].view(batch_size, 1, -1)
+		ts = hidden[0].view(batch_size, self.k_factors, -1)
 		# ts = embeddings1.view(batch_size, 5, -1)
 		ps = embeddings2.view(batch_size, 18, -1).transpose(1, 2)
 		
