@@ -72,9 +72,9 @@ if (__name__ == '__main__'):
 	X1_test, X2_test, y_test = process2(test_dataset)
 	torch.manual_seed(args.seed)
 	if args.model == 'auto':
-	    model = LookupTableAuto(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
+	    model = LookupTableAuto(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
 	elif args.model == 'auto_pos':
-	    model = LookupTablePos(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE)
+	    model = LookupTablePos(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
 	elif args.model == 'manual':
 	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
 	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)
