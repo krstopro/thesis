@@ -20,8 +20,8 @@ class LookupTablePos(nn.Module):
 		self.pos_embedding = nn.Embedding(4 * k_factors - 1, embedding_size)
 	
 	def init_hidden(self, batch_size):
-		return (autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * k_factors * self.embedding_size)),
-		        autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * k_factors * self.embedding_size)))
+		return (autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * self.k_factors * self.embedding_size)),
+		        autograd.Variable(torch.zeros(self.num_layers, batch_size, 3 * self.k_factors * self.embedding_size)))
 	
 	def forward(self, input1, input2):
 		"""
