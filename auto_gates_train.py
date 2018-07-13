@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from data_utils import *
-from auto_my import *
+from auto_pos_my import *
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,12 +16,12 @@ EMBEDDING_SIZE = 10
 HIDDEN_SIZE = 50
 OUTPUT_SIZE = 2
 NUM_LAYERS = 1
-NUM_EPOCHS = 50
+NUM_EPOCHS = 100
 BATCH_SIZE = 100
 LEARNING_RATE = 0.01
 
 #GAMMA = 0
-GAMMA = 1
+GAMMA = 1/60
 #GAMMA = 1/6
 
 BAR_WIDTH = 0.72
@@ -77,14 +77,13 @@ if (__name__ == '__main__'):
 		forget_gates_targets.append(forget_gates_target)
 	
 	while (True):
-		model = LookupTableMy(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE)
+		model = LookupTablePosMy(VOCAB_SIZE, EMBEDDING_SIZE, OUTPUT_SIZE, 1)
 		
 		optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
 		X1_train, X2_train, y_train = process2(train_dataset)
 		X1_test, X2_test, y_test = process2(test_dataset)
 		train_epoch_accuracy = []
 		test_epoch_accuracy = []
-		print(input_gates_target.size())
 		epochs = np.arange(1, NUM_EPOCHS+1)
 		for epoch in epochs:
 			for batch in data_loader:
@@ -94,10 +93,10 @@ if (__name__ == '__main__'):
 				prediction_loss = nll(logits, y_batch)
 				gates_loss = 0
 				for t in range(3):
-					print('input t = ' + str(t) + ': ' + str(F.binary_cross_entropy(model.input_gates[t], input_gates_targets[t].repeat(X1_batch.size(0), 1))))
+					#print('input t = ' + str(t) + ': ' + str(F.binary_cross_entropy(model.input_gates[t], input_gates_targets[t].repeat(X1_batch.size(0), 1))))
 					gates_loss += F.binary_cross_entropy(model.input_gates[t], input_gates_targets[t].repeat(X1_batch.size(0), 1))
 				for t in range(3):
-					print('forget t = ' + str(t) + ': ' + str(F.binary_cross_entropy(model.forget_gates[t], forget_gates_targets[t].repeat(X1_batch.size(0), 1))))
+					#print('forget t = ' + str(t) + ': ' + str(F.binary_cross_entropy(model.forget_gates[t], forget_gates_targets[t].repeat(X1_batch.size(0), 1))))
 					gates_loss += F.binary_cross_entropy(model.forget_gates[t], forget_gates_targets[t].repeat(X1_batch.size(0), 1))
 				loss = prediction_loss + GAMMA * gates_loss
 				print('Prediction loss = ' + str(prediction_loss.data[0].item()))
@@ -105,6 +104,7 @@ if (__name__ == '__main__'):
 				print('Total loss = ' + str(loss.data[0].item()))
 				print()
 				loss.backward()
+				"""
 				for name, param in model.named_parameters():
 					if (name == 'lstm.lstm_cell.wh.weight'):
 						print('wh norm = ' + str(param.grad.norm().item()))
@@ -115,6 +115,7 @@ if (__name__ == '__main__'):
 							raise Exception('Vanishing gradient')
 						print('wx norm = ' + str(param.grad.norm().item()))
 				print()
+				"""
 				optimizer.step()
 			
 			train_accuracy = accuracy(model(X1_train, X2_train), y_train)
