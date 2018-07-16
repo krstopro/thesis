@@ -4,11 +4,13 @@ import torch
 import torch.autograd as autograd
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from data_utils import *
 from auto import *
 from auto_pos import *
 from manual import *
+from auto_pos_my import *
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,8 +60,9 @@ if (__name__ == '__main__'):
 	ap.add_argument('-s', '--seed', type=int, default=0)
 	ap.add_argument('-e', '--embedding-size', type=int, default=10)
 	ap.add_argument('-l', '--learning-rate', type=float, default=0.1)
-	ap.add_argument('-m', '--model', choices=['manual', 'auto', 'auto_pos'])
+	ap.add_argument('-m', '--model', choices=['manual', 'auto', 'auto_pos', 'gates'])
 	ap.add_argument('-k', '--k-factors', type=int, default=1)
+	ap.add_argument('-g', '--gamma', type=float, default=1.0)
 	args = ap.parse_args()
 
 	os.makedirs(args.output, exist_ok=True)
@@ -77,6 +80,23 @@ if (__name__ == '__main__'):
 	    model = LookupTablePos(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
 	elif args.model == 'manual':
 	    model = LookupTableManual(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
+	elif args.model == 'gates':
+		embedding_size = args.embedding_size
+		k_factors = args.k_factors
+		model = LookupTablePosMy(VOCAB_SIZE, args.embedding_size, OUTPUT_SIZE, args.k_factors)
+		input_gates_targets = []
+		forget_gates_targets = []
+		pos = 0
+		for t in range(4 * k_factors - 1):
+			input_gates_target = torch.zeros(3 * k_factors * embedding_size)
+			forget_gates_target = torch.zeros(3 * k_factors * embedding_size)
+			forget_gates_target[:(embedding_size*pos)] = torch.ones(embedding_size*pos)
+			if ((t + 1) % 4 != 0):
+				input_gates_target[(embedding_size)*pos : (embedding_size*(pos+1))] = torch.ones(embedding_size)
+				pos += 1
+			input_gates_targets.append(input_gates_target)
+			forget_gates_targets.append(forget_gates_target)
+		
 	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)
 	train_epoch_accuracy = []
 	test_epoch_accuracy = []
@@ -87,6 +107,13 @@ if (__name__ == '__main__'):
 			model.zero_grad()
 			logits = model(X1_batch, X2_batch)
 			loss = nll(logits, y_batch)
+			if args.model == 'gates':
+				gates_loss = 0
+				batch_size = X1_batch.size(0)
+				for t in range(4 * k_factors - 1):
+					gates_loss += F.binary_cross_entropy(model.input_gates[t], input_gates_targets[t].repeat(batch_size, 1))
+					gates_loss += F.binary_cross_entropy(model.forget_gates[t], forget_gates_targets[t].repeat(batch_size, 1))
+				loss += args.gamma * gates_loss
 			# print('Loss = ' + str(loss.data[0]))
 			loss.backward()
 			optimizer.step()
