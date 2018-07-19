@@ -28,7 +28,7 @@ class MyLSTMCell(nn.Module):
 		o = F.sigmoid(so)
 		g = F.tanh(sg)
 		c = f * hidden[1] + i * F.tanh(g)
-		h = o * F.tanh(hidden[1])
+		h = o * F.tanh(c)
 		return h, c, i, f, o
 
 
