@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 VOCAB_SIZE = 7
 OUTPUT_SIZE = 2
 NUM_LAYERS = 1
-NUM_EPOCHS = 100
-BATCH_SIZE = 100
+NUM_EPOCHS = [None, 100, None, None, None, 1000]
+BATCH_SIZE = [None, 100, None, None, None, 1000]
 
 char2index = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, '#': 6, ' ': 7 }
 
@@ -68,7 +68,7 @@ if (__name__ == '__main__'):
 	os.makedirs(args.output, exist_ok=True)
 	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
 	train_dataset = LanguagesDataset('data/train{}.txt'.format(args.k_factors))
-	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE, shuffle = False)
+	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE[args.k_factors], shuffle = False)
 	test_dataset = LanguagesDataset('data/test{}.txt'.format(args.k_factors))
 	nll = nn.NLLLoss()
 	X1_train, X2_train, y_train = process2(train_dataset)
@@ -100,7 +100,7 @@ if (__name__ == '__main__'):
 	optimizer = optim.Adam(model.parameters(), lr = args.learning_rate)
 	train_epoch_accuracy = []
 	test_epoch_accuracy = []
-	epochs = np.arange(1, NUM_EPOCHS+1)
+	epochs = np.arange(1, NUM_EPOCHS[args.k_factors]+1)
 	for epoch in tqdm(epochs):
 		for batch in data_loader:
 			X1_batch, X2_batch, y_batch = process(batch)
@@ -113,14 +113,15 @@ if (__name__ == '__main__'):
 				for t in range(4 * k_factors - 1):
 					gates_loss += F.binary_cross_entropy(model.input_gates[t], input_gates_targets[t].repeat(batch_size, 1))
 					gates_loss += F.binary_cross_entropy(model.forget_gates[t], forget_gates_targets[t].repeat(batch_size, 1))
+				gates_loss /= (4 * k_factors - 1)
 				loss += args.gamma * gates_loss
 			# print('Loss = ' + str(loss.data[0]))
 			loss.backward()
 			optimizer.step()
 		train_accuracy = accuracy(model(X1_train, X2_train), y_train)
 		test_accuracy = accuracy(model(X1_test, X2_test), y_test)
-		train_epoch_accuracy.append(train_accuracy.item())
-		test_epoch_accuracy.append(test_accuracy.item())
+		train_epoch_accuracy.append(train_accuracy)
+		test_epoch_accuracy.append(test_accuracy)
 		# print('Epoch: ' + str(epoch))
 		# print('Train accuracy: ' + str(train_accuracy))
 		# print('Test accuracy: ' + str(test_accuracy))
