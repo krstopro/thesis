@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 VOCAB_SIZE = 7
 OUTPUT_SIZE = 2
 NUM_LAYERS = 1
-NUM_EPOCHS = [None, 100, None, None, None, 1000]
+NUM_EPOCHS = [None, 100, None, None, None, 200]
 BATCH_SIZE = [None, 100, None, None, None, 1000]
 
 char2index = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, '#': 6, ' ': 7 }
@@ -66,7 +66,6 @@ if (__name__ == '__main__'):
 	args = ap.parse_args()
 
 	os.makedirs(args.output, exist_ok=True)
-	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
 	train_dataset = LanguagesDataset('data/train{}.txt'.format(args.k_factors))
 	data_loader = DataLoader(train_dataset, batch_size = BATCH_SIZE[args.k_factors], shuffle = False)
 	test_dataset = LanguagesDataset('data/test{}.txt'.format(args.k_factors))
@@ -120,11 +119,13 @@ if (__name__ == '__main__'):
 			optimizer.step()
 		train_accuracy = accuracy(model(X1_train, X2_train), y_train)
 		test_accuracy = accuracy(model(X1_test, X2_test), y_test)
-		train_epoch_accuracy.append(train_accuracy)
-		test_epoch_accuracy.append(test_accuracy)
+		tqdm.write("train_acc={}, test_acc={}\r".format(train_accuracy.item(), test_accuracy.item()))
+		train_epoch_accuracy.append(train_accuracy.item())
+		test_epoch_accuracy.append(test_accuracy.item())
 		# print('Epoch: ' + str(epoch))
 		# print('Train accuracy: ' + str(train_accuracy))
 		# print('Test accuracy: ' + str(test_accuracy))
+	results = open(os.path.join(args.output, '{}.txt'.format(args.seed)), 'w')
 	results.write(' '.join([ str(round(100 * x, 2)) for x in train_epoch_accuracy]))
 	results.write('\n')
 	results.write(' '.join([ str(round(100 * x, 2)) for x in test_epoch_accuracy]))
