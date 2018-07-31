@@ -23,7 +23,11 @@
 \usepackage{ulem}
 \usepackage{titlesec}
 \usepackage{hyperref}
+\usepackage{float}
 \usepackage[ruled, linesnumbered, noalgohanging]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
 
 \addbibresource{references.bib}
 
@@ -31,6 +35,7 @@
 \newcounter{lemma}
 
 \newcommand\where[1][\big]{\:#1\vert\:}
+\newcommand{\otoprule}{\midrule[\heavyrulewidth]}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator{\softmax}{softmax}
@@ -39,6 +44,8 @@
 \DeclareMathOperator{\relu}{ReLU}
 \DeclareMathOperator{\CTM}{CTM}
 \DeclareMathOperator{\BDM}{BDM}
+
+\restylefloat{table}
 
 \makeatletter
 \newcommand{\RemoveAlgoNumber}{\renewcommand{\fnum@algocf}{\AlCapSty{\AlCapFnt\algorithmcfname}}}
@@ -197,7 +204,15 @@ Abstract goes here
 
 \chapter{Introduction}
 
+\chapter{Related Work}
+
+Learning to decide a formal language can be seen as an example of learning an algorithm from input/output examples. There are several approaches to this problem. One would be to induce a discrete program from finite set of instructions. Inductive logic programming \cite{muggleton1991inductive} requires domain specific knowledge about the programming languages and hand-crafted heuristics to speed up the underlying combinatorial search. Levin \cite{levin1973universal} devised an asymptotically optimal method for inverting functions on given output, albeit with a large constant factor. Hutter \cite{hutter2002fastest} reduced the constant factor to less than 5 at the expense of introducing a large additive constant. These methods are not incremental and do not make use of machine learning. Schmidhuber \cite{schmidhuber2004optimal} extended the principles of Levin's and Hutter's method and developed an asymptotically optimal, incremental method that learns from experience. However, the constants involved in the method are still large which limits its practical use.
+
+The approach that we will take over here is based on training differentiable neural networks. To the best of our knowledge no one used neural networks for deciding a whole class of formal languages, rather a single language from positive and negative examples. Mozer and Das \cite{mozer1993connectionist} used neural networks with external stack memory to parse simple context-free languages such as $a^n b^n$ and parenthesis balancing from both positive and negative examples. Wiles and Elman \cite{wiles1995learning} used neural networks to learn sequences of the form $a^n b^n$ and generalise on a limited range of $n$. Joulin and Mikolov \cite{joulin2015inferring} used recurrent neural networks augmented with a trainable memory to predict the next symbol of the element of context-free language. Lastly, Zaremba and Sutskever \cite{zaremba2014learning} used recurrent neural networks for learning to execute simple Python programs.
+
 \chapter{Background}
+
+In this chapter we ...
 
 \section{Locally k-testable languages}
 
@@ -206,7 +221,7 @@ Fix an alphabet $\mathcal{A} = \{ a_1, a_2, \ldots, a_n \}$. An $SL_k$ definitio
 A scanner for an $LT_k$ language contains a table in which it records, for every k-factor over the alphabet, whether or not that $k$-factor has occurred somewhere in the string. It then feeds this information into a Boolean network which implements some $k$-expression. When the end of the string is reached, the automaton accepts or rejects the string depending on the output of the network.
 
 \begin{center}
-\includegraphics[width=80mm]{locally_k-testable.jpg}
+\includegraphics[width=80mm]{figures/locally_k-testable.jpg}
 \end{center}
 
 \section{Recurrent Neural Networks}
@@ -218,12 +233,12 @@ Recurrent neural networks (RNNs) \cite{rumelhart1985learning} are parametric mod
 We start with a simple vanilla RNN model. A vanilla RNN is given with the following parameters:
 
 \begin{itemize}[itemsep = -2pt]
-\item Input to hidden connection weights $W_x \in \mathbb{R}^{d_h \times d_x}$
-\item Hidden to hidden connection weights $W_h \in \mathbb{R}^{d_h \times d_h}$
-\item Bias term $b_h \in \mathbb{R}^{d_h}$
+\item Input to hidden connection weights $\mathbf{W}^{\mathbf{x}} \in \mathbb{R}^{d_h \times d_x}$
+\item Hidden to hidden connection weights $\mathbf{W}^{\mathbf{h}} \in \mathbb{R}^{d_h \times d_h}$
+\item Bias term $\mathbf{b}^{\mathbf{h}} \in \mathbb{R}^{d_h}$
 \item Activation function $\phi: \mathbb{R} \to \mathbb{R}$
-\item Hidden to output connection weights $W_y \in \mathbb{R}^{d_y \times d_y}$
-\item Bias term $b_y \in \mathbb{R}^{d_y}$
+\item Hidden to output connection weights $W_y \in \mathbb{R}^{d_y \times d_h}$
+\item Bias term $\mathbf{b}^{\mathbf{y}} \in \mathbb{R}^{d_y}$
 \item Initial hidden state $h^{(0)} \in \mathbb{R}^{d_h}$ (usually set to zero vector)
 \end{itemize}
 
@@ -236,23 +251,23 @@ Connection weights model the strength of synapses and activation function models
 %\end{IEEEeqnarray*}
 
 \begin{center}
-\includegraphics[width=60mm]{tanh} \\
-\includegraphics[width=60mm]{sigma} \\
-\includegraphics[width=60mm]{relu}
+\includegraphics[width=60mm]{figures/tanh} \\
+\includegraphics[width=60mm]{figures/sigma} \\
+\includegraphics[width=60mm]{figures/relu}
 \end{center}
 
 \noindent
 The computation is performed in the following way: for $t = 1, 2, \ldots, T$
 \begin{align*}
-h^{(t)} &= \boldsymbol{\phi} \left( W_h h^{(t - 1)} + W_x x^{(t)} + b_h \right) \\
-y^{(t)} &= \softmax \left( W_y h^{(t)} + b_y \right)
+\mathbf{h}^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}} \, \mathbf{h}^{(t - 1)} + \mathbf{W}^{\mathbf{x}} \, \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}} \right) \\
+\mathbf{y}^{(t)} &= \softmax \left( \mathbf{W}^{\mathbf{y}} \, \mathbf{h}^{(t - 1)} + \mathbf{b}^{\mathbf{y}} \right)
 \end{align*}
 
 \noindent
 where $\boldsymbol{\phi}(v)_i = \phi(v_i)$ and $\softmax(v)_i = \exp(v_i) / \sum_j \exp(v_j)$. 
 
 \begin{center}
-RNN figure goes here.
+\includegraphics[width=150mm]{figures/rnn}
 \end{center}
 
 \noindent
@@ -277,12 +292,17 @@ While the previous example displays a rather simple function, vanilla RNNs are u
 
 We can also stack several RNN cells in order to exploit compositionality and obtain more powerful RNNs. Such RNNs are called multilayer or deep RNNs. The computation performed by an $L$ layer vanilla RNN is given with
 \begin{align*}
-\mathbf{h}_1^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_1 \mathbf{h}_1} \mathbf{h}_1^{(t - 1)} + \mathbf{W}^{\mathbf{x} \mathbf{h}_1} \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}_1} \right) \\
-\mathbf{h}_2^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_2 \mathbf{h}_2} \mathbf{h}_2^{(t - 1)} + \mathbf{W}^{\mathbf{x} \mathbf{h}_2} \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}_2} \right) \\
+\mathbf{h}_1^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_1 \mathbf{h}_1} \, \mathbf{h}_1^{(t - 1)} + \mathbf{W}^{\mathbf{x} \mathbf{h}_1} \, \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}_1} \right) \\
+\mathbf{h}_2^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_2 \mathbf{h}_2} \, \mathbf{h}_2^{(t - 1)} + \mathbf{W}^{\mathbf{h}_1 \mathbf{h}_2} \, \mathbf{h}_1^{(t)} + \mathbf{b}^{\mathbf{h}_2} \right) \\
 & \enspace \vdots \\
-\mathbf{h}_L^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_L \mathbf{h}_L} \mathbf{h}_L^{(t - 1)} + \mathbf{W}^{\mathbf{x} \mathbf{h}_L} \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}_L} \right) \\
-\mathbf{y}^{(t)} &= \softmax \left( \mathbf{W}^{\mathbf{h}_L \mathbf{y}} \mathbf{h}_L^{(t - 1)} + \mathbf{b}^{\mathbf{y}} \right)
+\mathbf{h}_L^{(t)} &= \boldsymbol{\phi} \left( \mathbf{W}^{\mathbf{h}_L \mathbf{h}_L} \, \mathbf{h}_L^{(t - 1)} + \mathbf{W}^{\mathbf{h}_{L-1} \mathbf{h}_L} \, \mathbf{x}^{(t)} + \mathbf{b}^{\mathbf{h}_L} \right) \\
+\mathbf{y}^{(t)} &= \softmax \left( \mathbf{W}^{\mathbf{y}} \, \mathbf{h}_L^{(t - 1)} + \mathbf{b}^{\mathbf{y}} \right)
 \end{align*}
+
+\begin{center}
+%\includegraphics[width=120mm]{deep_rnn}
+\end{center}
+
 Observe that we will need $L$ initial states $\mathbf{h}_1^{(0)}, \mathbf{h}_2^{(0)}, \ldots, \mathbf{h}_L^{(0)}$.
 
 \subsection{Backpropagation Through Time and Vanishing Gradient}
@@ -322,7 +342,7 @@ h^{(t)} &= \sigma(o^{(t)}) \odot \tanh(c^{(t)})
 where $\odot$ is component-wise or Hadamard product.
 
 \begin{center}
-\includegraphics[width=120mm]{lstm}
+\includegraphics[width=120mm]{figures/lstm}
 \end{center}
 
 Just like vanilla RNN cells, LSTM cells can be stacked in order to obtain more powerful multilayer LSTM networks.
@@ -357,6 +377,8 @@ a_k \mapsto \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}
 
 One problem with this encoding is that $k$ may be huge while one-hot vectors remain sparse. For example, in natural language processing $k$ would be the number of words which is usually several tens of thousands. This problem is solved by using embedding layer which learns to map alphabet elements to dense, low-dimensional encodings.
 
+\subsection{Encoder-Decoder Sequence to Sequence Models}
+
 \subsection{Attention Mechanism}
 
 When processing the input, RNNs store all the memory in the hidden state. However, it may be hard to compress potentially long input in a single context vector.
@@ -376,7 +398,268 @@ a^{(t)} = \aln (h^{(t)}, \bar{h}^{(s)}) = \softmax(\score(h^{(t)}, \bar{h}^{(s)}
 Attention figure goes here.
 \end{center}
 
+\subsection{Layer Normalization}
+
 \chapter{Experiments and Results}
+
+\section{Environment}
+
+We will be using two datasets called \textsc{Factor1} and \textsc{Factor5}. \textsc{Factor1} contains 4 positive and 4 negative examples of length 18 from each of 216 locally 3-testable languages specified by one 3-factor. The dataset is split into train subset containing 180 languages with corresponding positive and negative examples and test subset containing 36 languages with corresponding positive and negative examples. \textsc{Factor5} contains 4 positive and 4 negative examples of length 18 from each of 5000 locally 3-testable languages specified by five 3-factors. The dataset is split into train subset containing 4000 languages with corresponding positive and negative examples and test subset containing 1000 languages with corresponding positive and negative examples. In both cases, not a single 3-factor that occurs in the train subset set occurs in the test subset. This ensures that the test accuracy measures how well the trained model generalises out of the sample.
+\par
+A typical line in a \textsc{Factor5} dataset looks like one of the following two.
+\begin{IEEEeqnarray*}{rll}
+\textsf{abc\#acd\#bae\#dfb\#ecf} & \qquad \textsf{abaddfecbcffaebcad} & \qquad 1 \\
+\textsf{abc\#acd\#bae\#dfb\#ecf} & \qquad \textsf{abaddfecbcacdebcad} & \qquad 0
+\end{IEEEeqnarray*}
+The first part represents a 3-locally testable language specified by five 3-factors ''abc'', ''acd'', ''bae'', ''dfb'' and ''ecf''. The second part represents an input string (of length 18) and the third part whether the input string belongs to the language specified by the first part. For example, in the first line above string ''abaddfecbcffaebcad'' belongs to the language, while in the second line string ''abaddfecbcacdebcad'' does not belong to the language because it contains ''acd'' as a substring.
+
+\section{Methods}
+
+Similarly to sequence to sequence models (Section 3.x) we will be using two statistical models called encoder and decider. An encoder takes language representation as input and outputs the context vector $\mathbf{C}$ which acts as a vector description of language. A decider takes the context vector from encoder and string as input and outputs the probability that the string belongs to the language encoded in that context vector.
+
+\begin{center}
+Encoder-decider architecture figure goes here.
+\end{center}
+
+In the following, encoder will always be an RNN whose final hidden state will be the context vector. The model of the decider will vary across experiments. Both encoder and decider are trained by minimising the mean cross entropy between the actual value of string belonging to language (0 or 1) and predicted probability that the input string belongs to the language. For optimisation we will be using Adam optimisation algorithm \cite{kingma2014adam}.
+
+\section{RNN Decider}
+
+In this section both encoder and decider will be RNNs. We will be using LSTMs and GRUs with 1 or 2 layers and 20, 50 or 100 hidden units per layer. Embeddings of size 10 are trained jointly with the model. The maximal test accuracy over the period of 50 epochs is reported in Table 4.1.
+
+\begin{table}[H]
+\caption{Table caption goes here}
+\centering
+\begin{tabular}{cccc}
+\toprule%
+\textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
+\otoprule%
+LSTM & 1 & 20 & 52.25\% \\
+LSTM & 1 & 50 & 51.99\% \\
+LSTM & 1 & 100 & 51.31\% \\
+LSTM & 2 & 20 & 53.58\% \\
+LSTM & 2 & 50 & 51.08\% \\
+LSTM & 2 & 100 & 50.4\% \\
+GRU & 1 & 20 & 52.66\% \\ 
+GRU & 1 & 50 & 52.91\% \\
+GRU & 1 & 100 & 51.7\% \\
+GRU & 2 & 20 & 53.09\% \\
+GRU & 2 & 50 & 52.59\% \\
+GRU & 2 & 100 & 52.18\% \\
+\bottomrule
+\end{tabular}
+\label{table:nonlin}
+\end{table}
+
+The evolution of training and test accuracy of the overall best model (model parameters go here) are plotted on the figure below.
+
+\begin{center}
+Learning evolution plot goes here.
+\end{center}
+
+We see that RNNs fail to generalise to unseen 3-factors.
+
+\section{Adding Attention}
+
+Now we add the attention as described in Section 4.x to the models studied in the previous section. Again, the maximal test accuracy over the period of 50 epochs is taken. The results are displayed in Table 4.2.
+
+\begin{table}[H]
+\caption{Table caption goes here}
+\centering
+\begin{tabular}{cccc}
+\toprule%
+\textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
+\otoprule%
+LSTM & 1 & 20 & ? \\
+LSTM & 1 & 50 & ? \\
+LSTM & 1 & 100 & ? \\
+LSTM & 2 & 20 & ? \\
+LSTM & 2 & 50 & ? \\
+LSTM & 2 & 100 & ? \\
+GRU & 1 & 20 & ? \\ 
+GRU & 1 & 50 & ? \\
+GRU & 1 & 100 & ? \\
+GRU & 2 & 20 & ? \\
+GRU & 2 & 50 & ? \\
+GRU & 2 & 100 & ? \\
+\bottomrule
+\end{tabular}
+\label{table:nonlin}
+\end{table}
+
+The evolution of training and test accuracy of the overall best model (model parameters go here) are plotted on the figure below.
+
+\begin{center}
+Learning evolution plot goes here.
+\end{center}
+
+We see that using attention greatly improves generalisation of RNNs. However, the performance is still far away from perfect, i.e. test accuracy of 100\%.
+
+\section{Decider as Scanner}
+
+Since we are dealing with locally 3-testable languages we may want to use a simpler model of decider instead of RNN. In this section we will be using scanner as in Section 3.x as a decider.
+
+\subsection{Implementing Scanner}
+
+Here we show how a scanner that operates on vector encodings of strings can be implemented. Suppose that we are given a $k$-locally testable language specified by $F$ $k$-factors. The following algorithm describes such a scanner.
+
+\normalem
+\begin{algorithm}
+\caption{Scanner}
+\KwIn{context vector $C$, input string $x$}
+Split context vector $C$ into $F$ parts of equal size $C_1, C_2, \ldots, C_F$. \\
+\For{$i = 1$ \KwTo $n-k+1$}{
+Take encodings of $x_i, x_{i+1}, \ldots, x_{i+k-1}$ and concatenate them. Let $\bar{x}_i$ be the resulting vector.
+$m_{ij} \leftarrow \langle \bar{x}_i, C_j \rangle$
+}
+$m \leftarrow \max_{i, j} m_{ij}$ \\
+\Return $\sigma(m)$
+\end{algorithm}
+\ULforem
+
+\noindent
+In other words, scanner takes a context vector and input string and uses dot product to check if there is a match between parts of context vector and substrings of input string of length $k$.
+
+\begin{center}
+Scanner figure goes here.
+\end{center}
+
+\noindent
+Hence, the goal of encoder is to arrange the encodings of $k$-factors in the context vector $C$.
+
+To verify that the proposed model works correctly, we take the encodings of 3-factors in \textsc{Factor1} and \textsc{Factor5} and concatenate them to obtain the context vector that we pass to the scanner. On both datasets we obtain the test accuracy of 100\%.
+
+\subsection{Passing factors to LSTM}
+
+In this section we go one step further: instead of concatenating the encodings of 3-factors and passing them to the scanner we will first feed them to RNN, concatenate the outputs and then pass them to the scanner. This should prove that RNN is able to "store" 3-factors in its hidden state. We will use LSTM with hidden size equal to the embedding dimension $d$. While the model can achieve the test accuracy of 100\%, we find that the final accuracy on the test set highly depends on initial values of parameters. We run 100 experiments with different values of embedding size $d$ and learning rate $\lambda$. The results on \textsc{Factor1} and \textsc{Factor5} are plotted on figures 4.x and 4.x respectively.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-01}
+\caption{$d = 5, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-001}
+\caption{$d = 5, \lambda = 0.001$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-01}
+\caption{$d = 10, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-001}
+\caption{$d = 10, \lambda = 0.001$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-01}
+\caption{$d = 20, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-001}
+\caption{$d = 20, \lambda = 0.001$}
+\end{subfigure}
+\caption{Factor1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-01}
+\caption{$d = 5, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-001}
+\caption{$d = 5, \lambda = 0.001$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-01}
+\caption{$d = 10, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-001}
+\caption{$d = 10, \lambda = 0.001$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-01}
+\caption{$d = 20, \lambda = 0.01$}
+\end{subfigure}
+\begin{subfigure}{7cm}
+\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-001}
+\caption{$d = 20, \lambda = 0.001$}
+\end{subfigure}
+\caption{Factor5}
+\end{figure}
+
+\subsection{Passing Representations to LSTM}
+
+Now we pass the whole language representation ...
+
+%\begin{figure}[H]
+%\centering
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-01}
+%\caption{$d = 5, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-001}
+%\caption{$d = 5, \lambda = 0.001$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-01}
+%\caption{$d = 10, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-001}
+%\caption{$d = 10, \lambda = 0.001$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-01}
+%\caption{$d = 20, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-001}
+%\caption{$d = 20, \lambda = 0.001$}
+%\end{subfigure}
+%\caption{Factor1}
+%\end{figure}
+
+%\begin{figure}[H]
+%\centering
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-01}
+%\caption{$d = 5, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-001}
+%\caption{$d = 5, \lambda = 0.001$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-01}
+%\caption{$d = 10, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-001}
+%\caption{$d = 10, \lambda = 0.001$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-01}
+%\caption{$d = 20, \lambda = 0.01$}
+%\end{subfigure}
+%\begin{subfigure}{7cm}
+%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-001}
+%\caption{$d = 20, \lambda = 0.001$}
+%\end{subfigure}
+%\caption{Factor5}
+%\end{figure}
+
+\subsection{Using Positional Encodings}
+
+One of the problems of ...
+
+\subsection{Supervising LSTM Gates}
+
+\chapter{Discussion and Future Work}
 
 \normalem
 \printbibliography
