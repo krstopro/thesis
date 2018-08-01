@@ -1,4 +1,6 @@
 import argparse
+import matplotlib
+matplotlib.use("Agg")
 import os
 import torch
 import torch.autograd as autograd
@@ -59,7 +61,7 @@ if (__name__ == '__main__'):
 	ap.add_argument('-o', '--output', default='results')
 	ap.add_argument('-s', '--seed', type=int, default=0)
 	ap.add_argument('-e', '--embedding-size', type=int, default=10)
-	ap.add_argument('-l', '--learning-rate', type=float, default=0.1)
+	ap.add_argument('-l', '--learning-rate', type=float, default=0.01)
 	ap.add_argument('-m', '--model', choices=['lstm', 'gru', 'lnlstm', 'lngru', 'attn_lstm', 'attn_gru', 'attn_lnlstm', 'attn_lngru'])
 	ap.add_argument('-k', '--k-factors', type=int, default=5)
 	ap.add_argument('-n', '--num-layers', type=int, default=1)
@@ -84,9 +86,9 @@ if (__name__ == '__main__'):
 	if args.model == 'lngru':
 		raise Exception('Not yet added')
 	if args.model == 'attn_lstm':
-		model = AttentionDoubleLSTM(VOCAB_SIZE, args.embedding_size, args.hidden_size, OUTPUT_SIZE, args.num_layers, 4 * k_factors - 1)
+		model = AttentionDoubleLSTM(VOCAB_SIZE, args.embedding_size, args.hidden_size, OUTPUT_SIZE, args.num_layers, 4 * args.k_factors - 1)
 	if args.model == 'attn_gru':
-		model = AttentionDoubleGRU(VOCAB_SIZE, args.embedding_size, args.hidden_size, OUTPUT_SIZE, args.num_layers, 4 * k_factors - 1)
+		model = AttentionDoubleGRU(VOCAB_SIZE, args.embedding_size, args.hidden_size, OUTPUT_SIZE, args.num_layers, 4 * args.k_factors - 1)
 	if args.model == 'attn_lnlstm':
 		raise Exception('Not yet added')
 	if args.model == 'atnn_lngru':
