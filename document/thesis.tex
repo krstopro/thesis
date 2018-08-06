@@ -6,6 +6,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{illcmolthesis}
 \usepackage[a4paper, margin=1.08in]{geometry}
+%\usepackage[a4paper, margin=1.5in]{geometry}
+%\usepackage[a4paper, margin=1.2in]{geometry}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -28,6 +30,7 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{booktabs}
+\usepackage{verbatim}
 
 \addbibresource{references.bib}
 
@@ -402,61 +405,92 @@ Attention figure goes here.
 
 \chapter{Experiments and Results}
 
+In this chapter we ...
+
 \section{Environment}
 
-We will be using two datasets called \textsc{Factor1} and \textsc{Factor5}. \textsc{Factor1} contains 4 positive and 4 negative examples of length 18 from each of 216 locally 3-testable languages specified by one 3-factor. The dataset is split into train subset containing 180 languages with corresponding positive and negative examples and test subset containing 36 languages with corresponding positive and negative examples. \textsc{Factor5} contains 4 positive and 4 negative examples of length 18 from each of 5000 locally 3-testable languages specified by five 3-factors. The dataset is split into train subset containing 4000 languages with corresponding positive and negative examples and test subset containing 1000 languages with corresponding positive and negative examples. In both cases, not a single 3-factor that occurs in the train subset set occurs in the test subset. This ensures that the test accuracy measures how well the trained model generalises out of the sample.
+We will be using two datasets called \textsc{Factor1} and \textsc{Factor5}. \textsc{Factor1} contains 4 positive and 4 negative examples of length 18 from each of 216 locally 3-testable languages specified by one 3-factor. The dataset is split into a train subset containing 180 languages with corresponding positive and negative examples and a test subset containing 36 languages with corresponding positive and negative examples. \textsc{Factor5} contains 4 positive and 4 negative examples of length 18 from each of 5000 locally 3-testable languages specified by five 3-factors. The dataset is split into a train subset containing 4000 languages with corresponding positive and negative examples and a test subset containing 1000 languages with corresponding positive and negative examples. In both cases, not a single 3-factor that occurs in the train subset set occurs in the test subset. This ensures that the test accuracy measures how well the trained model generalises out of the sample.
 \par
 A typical line in a \textsc{Factor5} dataset looks like one of the following two.
 \begin{IEEEeqnarray*}{rll}
 \textsf{abc\#acd\#bae\#dfb\#ecf} & \qquad \textsf{abaddfecbcffaebcad} & \qquad 1 \\
 \textsf{abc\#acd\#bae\#dfb\#ecf} & \qquad \textsf{abaddfecbcacdebcad} & \qquad 0
 \end{IEEEeqnarray*}
-The first part represents a 3-locally testable language specified by five 3-factors ''abc'', ''acd'', ''bae'', ''dfb'' and ''ecf''. The second part represents an input string (of length 18) and the third part whether the input string belongs to the language specified by the first part. For example, in the first line above string ''abaddfecbcffaebcad'' belongs to the language, while in the second line string ''abaddfecbcacdebcad'' does not belong to the language because it contains ''acd'' as a substring.
+The first part represents a 3-locally testable language specified by five 3-factors ``abc'', ``acd'', ``bae'', ``dfb'' and ``ecf''. The second part represents an input string (of length 18) and the third part whether the input string belongs to the language specified by the first part. For example, in the first line above string ``abaddfecbcffaebcad'' belongs to the language, while in the second line string ``abaddfecbcacdebcad'' does not belong to the language because it contains ``acd'' as a substring.
 
 \section{Methods}
 
-Similarly to sequence to sequence models (Section 3.x) we will be using two statistical models called encoder and decider. An encoder takes language representation as input and outputs the context vector $\mathbf{C}$ which acts as a vector description of language. A decider takes the context vector from encoder and string as input and outputs the probability that the string belongs to the language encoded in that context vector.
+Similarly to sequence to sequence models (Section 3.x) we will be using two statistical models called encoder and decider. An encoder takes language representation as input and outputs the context vector $\mathbf{c}$ which acts as a vector description of language. A decider takes the context vector from encoder and string as input and outputs the probability that the string belongs to the language encoded in that context vector.
 
 \begin{center}
 Encoder-decider architecture figure goes here.
 \end{center}
 
-In the following, encoder will always be an RNN whose final hidden state will be the context vector. The model of the decider will vary across experiments. Both encoder and decider are trained by minimising the mean cross entropy between the actual value of string belonging to language (0 or 1) and predicted probability that the input string belongs to the language. For optimisation we will be using Adam optimisation algorithm \cite{kingma2014adam}.
+In the following, encoder will always be an RNN whose final hidden state will be the context vector. The model of the decider will vary across experiments. Both encoder and decider are trained by minimising the mean cross entropy between the actual value of the string belonging to language (0 or 1) and predicted probability that the input string belongs to the language. For optimisation we will be using Adam optimisation algorithm \cite{kingma2014adam}.
 
 \section{RNN Decider}
 
 In this section both encoder and decider will be RNNs. We will be using LSTMs and GRUs with 1 or 2 layers and 20, 50 or 100 hidden units per layer. Embeddings of size 10 are trained jointly with the model. The maximal test accuracy over the period of 50 epochs is reported in Table 4.1.
 
 \begin{table}[H]
-\caption{Table caption goes here}
+\caption{Factor1}
 \centering
 \begin{tabular}{cccc}
 \toprule%
 \textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
 \otoprule%
-LSTM & 1 & 20 & 52.25\% \\
-LSTM & 1 & 50 & 51.99\% \\
-LSTM & 1 & 100 & 51.31\% \\
-LSTM & 2 & 20 & 53.58\% \\
-LSTM & 2 & 50 & 51.08\% \\
-LSTM & 2 & 100 & 50.4\% \\
-GRU & 1 & 20 & 52.66\% \\ 
-GRU & 1 & 50 & 52.91\% \\
-GRU & 1 & 100 & 51.7\% \\
-GRU & 2 & 20 & 53.09\% \\
-GRU & 2 & 50 & 52.59\% \\
-GRU & 2 & 100 & 52.18\% \\
+LSTM & 1 & 20 & 58.68\% \\
+LSTM & 1 & 50 & 59.72\% \\
+LSTM & 1 & 100 & 57.99\% \\
+LSTM & 2 & 20 & 58.68\% \\
+LSTM & 2 & 50 & 57.99\% \\
+LSTM & 2 & 100 & 55.9\% \\
+GRU & 1 & 20 & 60.42\% \\ 
+GRU & 1 & 50 & 58.33\% \\
+GRU & 1 & 100 & 61.46\% \\
+GRU & 2 & 20 & 61.81\% \\
+GRU & 2 & 50 & 59.03\% \\
+GRU & 2 & 100 & 62.5\% \\
 \bottomrule
 \end{tabular}
-\label{table:nonlin}
 \end{table}
 
-The evolution of training and test accuracy of the overall best model (model parameters go here) are plotted on the figure below.
+\begin{figure}[H]
+\centering
+\includegraphics[width = 96mm]{figures/plots/gru_2_100_6250}
+\caption{Evolution of train and test accuracy of model for which the maximum is achieved.}
+\end{figure}
 
-\begin{center}
-Learning evolution plot goes here.
-\end{center}
+\begin{table}[H]
+\caption{Factor5}
+\centering
+\begin{tabular}{cccc}
+\toprule%
+\textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
+\otoprule%
+LSTM & 1 & 20 & 52.51\% \\
+LSTM & 1 & 50 & 52.6\% \\
+LSTM & 1 & 100 & 51.59\% \\
+LSTM & 2 & 20 & 52.48\% \\
+LSTM & 2 & 50 & 52.52\% \\
+LSTM & 2 & 100 & 52.14\% \\
+GRU & 1 & 20 & 53.35\% \\ 
+GRU & 1 & 50 & 54.35\% \\
+GRU & 1 & 100 & 52.41\% \\
+GRU & 2 & 20 & 53.42\% \\
+GRU & 2 & 50 & 52.48\% \\
+GRU & 2 & 100 & 54.01\% \\
+\bottomrule
+\end{tabular}
+\end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width = 96mm]{figures/plots/gru_1_50_5435}
+\caption{Evolution of train and test accuracy of model for which the maximum is achieved.}
+\end{figure}
+
+\noindent
 We see that RNNs fail to generalise to unseen 3-factors.
 
 \section{Adding Attention}
@@ -464,40 +498,68 @@ We see that RNNs fail to generalise to unseen 3-factors.
 Now we add the attention as described in Section 4.x to the models studied in the previous section. Again, the maximal test accuracy over the period of 50 epochs is taken. The results are displayed in Table 4.2.
 
 \begin{table}[H]
-\caption{Table caption goes here}
+\caption{Factor5}
 \centering
 \begin{tabular}{cccc}
 \toprule%
 \textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
 \otoprule%
-LSTM & 1 & 20 & ? \\
-LSTM & 1 & 50 & ? \\
-LSTM & 1 & 100 & ? \\
-LSTM & 2 & 20 & ? \\
-LSTM & 2 & 50 & ? \\
-LSTM & 2 & 100 & ? \\
-GRU & 1 & 20 & ? \\ 
-GRU & 1 & 50 & ? \\
-GRU & 1 & 100 & ? \\
-GRU & 2 & 20 & ? \\
-GRU & 2 & 50 & ? \\
-GRU & 2 & 100 & ? \\
+LSTM & 1 & 20 & 58.33\% \\
+LSTM & 1 & 50 & 58.68\% \\
+LSTM & 1 & 100 & 56.6\% \\
+LSTM & 2 & 20 & 56.34\% \\
+LSTM & 2 & 50 & 59.03\% \\
+LSTM & 2 & 100 & 58.33\% \\
+GRU & 1 & 20 & 67.01\% \\ 
+GRU & 1 & 50 & 64.24\% \\
+GRU & 1 & 100 & 59.72\% \\
+GRU & 2 & 20 & 62.5\% \\
+GRU & 2 & 50 & 59.72\% \\
+GRU & 2 & 100 & 61.11\% \\
 \bottomrule
 \end{tabular}
-\label{table:nonlin}
 \end{table}
 
-The evolution of training and test accuracy of the overall best model (model parameters go here) are plotted on the figure below.
+\begin{figure}[H]
+\centering
+\includegraphics[width = 96mm]{figures/plots/attn_gru_1_20_6701}
+\caption{Evolution of train and test accuracy of model for which the maximum is achieved.}
+\end{figure}
 
-\begin{center}
-Learning evolution plot goes here.
-\end{center}
+\begin{table}[H]
+\caption{Factor5}
+\centering
+\begin{tabular}{cccc}
+\toprule%
+\textbf{RNN} & \textbf{Number of layers} & \textbf{Number of hidden units} & \textbf{Test accuracy} \\
+\otoprule%
+LSTM & 1 & 20 & 80.86\% \\
+LSTM & 1 & 50 & 80.23\% \\
+LSTM & 1 & 100 & 72.56\% \\
+LSTM & 2 & 20 & 65.33\% \\
+LSTM & 2 & 50 & 65.26\% \\
+LSTM & 2 & 100 & 64.96\% \\
+GRU & 1 & 20 & 81.33\% \\ 
+GRU & 1 & 50 & 78.97\% \\
+GRU & 1 & 100 & 79.75\% \\
+GRU & 2 & 20 & 73.56\% \\
+GRU & 2 & 50 & 67.26\% \\
+GRU & 2 & 100 & 66.29\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 96mm]{figures/plots/attn_gru_1_20_8132}
+\caption{Evolution of train and test accuracy of model for which the maximum is achieved.}
+\end{figure}
 
 We see that using attention greatly improves generalisation of RNNs. However, the performance is still far away from perfect, i.e. test accuracy of 100\%.
 
 \section{Decider as Scanner}
 
-Since we are dealing with locally 3-testable languages we may want to use a simpler model of decider instead of RNN. In this section we will be using scanner as in Section 3.x as a decider.
+In this section we provide some useful bias to the model by constraining the decider to a differentiable version of a scanner that contains a look-up table as such structure is sufficient to decide a locally $k$-testable language.
 
 \subsection{Implementing Scanner}
 
@@ -506,11 +568,11 @@ Here we show how a scanner that operates on vector encodings of strings can be i
 \normalem
 \begin{algorithm}
 \caption{Scanner}
-\KwIn{context vector $C$, input string $x$}
-Split context vector $C$ into $F$ parts of equal size $C_1, C_2, \ldots, C_F$. \\
+\KwIn{context vector $\mathbf{c}$, string $x$ of length $n$}
+Split context vector $\mathbf{c}$ into $F$ parts of equal size $\mathbf{c}_1, \mathbf{c}_2, \ldots, \mathbf{c}_F$. \\
 \For{$i = 1$ \KwTo $n-k+1$}{
-Take encodings of $x_i, x_{i+1}, \ldots, x_{i+k-1}$ and concatenate them. Let $\bar{x}_i$ be the resulting vector.
-$m_{ij} \leftarrow \langle \bar{x}_i, C_j \rangle$
+Take encodings of $x_i, x_{i+1}, \ldots, x_{i+k-1}$ and concatenate them. Let $\mathbf{\bar{x}}_i$ be the resulting vector. \\
+$m_{ij} \leftarrow \langle \mathbf{\bar{x}}_i, \mathbf{c}_j \rangle$
 }
 $m \leftarrow \max_{i, j} m_{ij}$ \\
 \Return $\sigma(m)$
@@ -525,13 +587,95 @@ Scanner figure goes here.
 \end{center}
 
 \noindent
-Hence, the goal of encoder is to arrange the encodings of $k$-factors in the context vector $C$.
+Hence, the goal of encoder is to construct a look-up table by arranging the encodings of $k$-factors in the context vector $\mathbf{c}$.
 
 To verify that the proposed model works correctly, we take the encodings of 3-factors in \textsc{Factor1} and \textsc{Factor5} and concatenate them to obtain the context vector that we pass to the scanner. On both datasets we obtain the test accuracy of 100\%.
 
+\subsection{Passing Representations to LSTM}
+
+Here we will use only the final hidden state of the RNN encoder as the context vector. This tests whether an RNN can arrange the copies of $k$-factors in its memory. We will use LSTM with hidden size equal to $3d$ times the number of 3-factors (i.e. $3d$ for \textsc{Factor1} and $15d$ for \textsc{Factor5}), where $d$ is the embedding dimension. On \textsc{Factor1} we train the model for 100 epochs. We find out that the test accuracy highly depends on initial values of parameters. To study this, we perform 100 experiments with different values of embedding dimension $d$ and learning rate $\lambda$. The results are displayed in Figure 4.5.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor1/auto/10-01}
+\caption{Factor1}
+\end{figure}
+
+\noindent
+For \textsc{Factor5} we take the values of $d$ and $\lambda$ for which the model generalised most times on \textsc{Factor1} and perform 50 experiments with 200 epochs each. Unfortunately, none of the runs generalises to unseen 3-factors. The results are displayed in Figure 4.6.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor5/auto/10-01}
+\caption{Factor5}
+\end{figure}
+
 \subsection{Passing factors to LSTM}
 
-In this section we go one step further: instead of concatenating the encodings of 3-factors and passing them to the scanner we will first feed them to RNN, concatenate the outputs and then pass them to the scanner. This should prove that RNN is able to "store" 3-factors in its hidden state. We will use LSTM with hidden size equal to the embedding dimension $d$. While the model can achieve the test accuracy of 100\%, we find that the final accuracy on the test set highly depends on initial values of parameters. We run 100 experiments with different values of embedding size $d$ and learning rate $\lambda$. The results on \textsc{Factor1} and \textsc{Factor5} are plotted on figures 4.x and 4.x respectively.
+Here we show that RNN is able to learn to store sufficiently similar copies of factors in its memory. We do this in the following way: we feed the encodings of symbols from language representation to the RNN. We concatenate the hidden states corresponding to 3-factors (ignoring hidden states corresponding to ``\#'') and obtain the context vector which we pass to the scanner. We use LSTM with hidden size equal to the embedding dimension $d$. On \textsc{Factor1} we train the model for 100 epochs. Again, the test accuracy highly depends on initial values of parameters. We run 100 experiments with different values of embedding size $d$ and learning rate $\lambda$. The results are displayed in Figure 4.7.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor1/manual/10-01}
+\caption{Factor1}
+\end{figure}
+
+\noindent
+For \textsc{Factor5} we take the values of $d$ and $\lambda$ for which the model generalised most times on \textsc{Factor1} and perform 50 experiments with 200 epochs each. The results are displayed in Figure 4.8.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor5/manual/10-01}
+\caption{Factor5}
+\end{figure}
+
+\noindent
+On both datasets the model is able to achieve the test accuracy of 100\%.
+
+\subsection{Using Positional Encodings}
+
+One of the problems of approach used in 4.5.2 is that the whole hidden state is reserved for storing the encodings of 3-factors. In that way RNN does not know how to store the information at each time step. This naturally motivates the use of positional encodings, i.e. instead of feeding the encoding of the symbol to the RNN, we feed it the encoding of the symbol concatenated with the encoding of the symbol position in language representation. As in 4.5.2 we will use LSTM with hidden size equal to $3d$ times the number of 3-factors (i.e. $3d$ for \textsc{Factor1} and $15d$ for \textsc{Factor5}), where $d$ is the embedding dimension. On \textsc{Factor1} we train the model for 100 epochs. Again, the test accuracy highly depends on initial values of parameters. We run 100 experiments with different values of embedding size $d$ and learning rate $\lambda$. The results are displayed in Figure 4.9.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor1/auto_pos/10-01}
+\caption{Factor1}
+\end{figure}
+
+\noindent
+For \textsc{Factor5} we take the values of $d$ and $\lambda$ for which the model generalised most times on \textsc{Factor1} and perform 50 experiments with 200 epochs each. The results are displayed in Figure 4.10.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor5/auto_pos/20-01}
+\caption{Factor1}
+\end{figure}
+
+\subsection{Supervising LSTM Gates}
+
+Here we force the LSTM to store the information at the right location by providing supervision on its gate activations at each time step. In the case of \textsc{Factor1}, we want to store the first symbol in first third hidden units, second symbol in the second third hidden units and third symbol in last third hidden units. This is achieved by setting the first third input gates to be close to 1 and rest close to 0 on first time step; second third input gates to be close to 1 and rest close to 0 on second time step; last third input gates to be close to 1 and rest close to 0 on third time step. Similarly, for forget gates we want first third to be close to 1 on second time step; first and second third to be close to 1 on third time step. The idea is naturally extended for more 3-factors. We will use cross entropy to measure the error in gate activations. The loss associated to the gates will be multiplied by a hyperparameter $\gamma$ and added to the original loss. On \textsc{Factor1} we train the model for 100 epochs. Again, the test accuracy highly depends on initial values of parameters. We run 100 experiments with different values of embedding size $d$ and learning rate $\lambda$. The results are displayed in Figure 4.11.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor1/gates/5-01-01}
+\caption{Factor1}
+\end{figure}
+
+\noindent
+For \textsc{Factor5} we take the values of $d$, $\lambda$ and $\gamma$ for which the model generalised most times on \textsc{Factor1} and perform 50 experiments with 200 epochs each. The results are displayed in Figure 4.10.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 108mm]{figures/histograms/factor5/gates/5-01-01}
+\caption{Factor1}
+\end{figure}
+
+\chapter{Discussion and Future Work}
+
+\normalem
+\printbibliography
+
+\begin{comment}
 
 \begin{figure}[H]
 \centering
@@ -591,77 +735,6 @@ In this section we go one step further: instead of concatenating the encodings o
 \caption{Factor5}
 \end{figure}
 
-\subsection{Passing Representations to LSTM}
-
-Now we pass the whole language representation ...
-
-%\begin{figure}[H]
-%\centering
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-01}
-%\caption{$d = 5, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/5-001}
-%\caption{$d = 5, \lambda = 0.001$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-01}
-%\caption{$d = 10, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/10-001}
-%\caption{$d = 10, \lambda = 0.001$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-01}
-%\caption{$d = 20, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor1/manual/20-001}
-%\caption{$d = 20, \lambda = 0.001$}
-%\end{subfigure}
-%\caption{Factor1}
-%\end{figure}
-
-%\begin{figure}[H]
-%\centering
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-01}
-%\caption{$d = 5, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/5-001}
-%\caption{$d = 5, \lambda = 0.001$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-01}
-%\caption{$d = 10, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/10-001}
-%\caption{$d = 10, \lambda = 0.001$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-01}
-%\caption{$d = 20, \lambda = 0.01$}
-%\end{subfigure}
-%\begin{subfigure}{7cm}
-%\centering\includegraphics[width = 72mm]{figures/histograms/factor5/manual/20-001}
-%\caption{$d = 20, \lambda = 0.001$}
-%\end{subfigure}
-%\caption{Factor5}
-%\end{figure}
-
-\subsection{Using Positional Encodings}
-
-One of the problems of ...
-
-\subsection{Supervising LSTM Gates}
-
-\chapter{Discussion and Future Work}
-
-\normalem
-\printbibliography
+\end{comment}
 
 \end{document}
